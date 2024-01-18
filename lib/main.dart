@@ -12,7 +12,7 @@ class AttendanceApplicationApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'My Flutter Project',
+      title: 'AttendanceApplication',
       theme: light_theme,
       routes: routes,
     );

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:attendanceapplication/src/features/register/register.dart';
 
 class LoginScreen extends StatelessWidget {
   const LoginScreen({
@@ -33,7 +32,7 @@ class LoginScreen extends StatelessWidget {
                     SizedBox(height: 20),
                     ElevatedButton(
                       onPressed: () {
-                        Navigator.of(context).pushNamed('/attendance');
+                        Navigator.of(context).pushNamed('/main');
                       },
                       child: Text('Login'),
                     ),
