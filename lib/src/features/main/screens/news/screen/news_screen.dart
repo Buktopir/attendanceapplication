@@ -1,3 +1,5 @@
+// news_screen.dart
+import 'package:attendanceapplication/src/features/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 
 class NewsScreen extends StatefulWidget {
@@ -6,69 +8,206 @@ class NewsScreen extends StatefulWidget {
 }
 
 class _NewsScreenState extends State<NewsScreen> {
-  List<String> data = ['']; // Изначально один пустой элемент
+  List<Widget> widgetsList = [];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text('News'),
+        actions: [
+          PopupMenuButton<String>(
+            onSelected: (value) {
+              if (value == 'Add News') {
+                _showAddNewsBottomSheet(context);
+              } else if (value == 'Add Poll') {
+                _showAddPollBottomSheet(context);
+              }
+            },
+            itemBuilder: (BuildContext context) {
+              return ['Add News', 'Add Poll'].map((String choice) {
+                return PopupMenuItem<String>(
+                  value: choice,
+                  child: Text(choice),
+                );
+              }).toList();
+            },
+          ),
+        ],
       ),
-      body: Center(
-        child: ListView.builder(
-          itemCount: data.length,
-          itemBuilder: (BuildContext context, int index) {
-            return NewRowItem(
-              text: data[index],
-              onChanged: (newText) {
-                setState(() {
-                  data[index] = newText;
-                });
-                // Если это последний элемент и он не пустой, добавляем новый пустой элемент
-                if (index == data.length - 1 && newText.isNotEmpty) {
-                  data.add('');
-                }
+      body: SingleChildScrollView(
+          padding: EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children:[
+            TextNewsWidget(
+              title: 'Important News Title',
+              newsText:
+                  'This is the content of the news. It can be a longer text describing the news.',
+              author: 'Viktor ',
+              dateTime: 'January 21, 2024 10:30 AM',
+            ),
+            SizedBox(height: 16.0),
+            PollWidget(
+              question: 'What is your favorite color?',
+              options: ['Red', 'Blue', 'Green', 'Yellow'],
+              author: 'Viktor',
+              dateTime: 'January 21, 2024 11:45 AM',
+            ),]
+          )),
+    );
+  }
 
-                // Удаляем все пустые элементы, кроме последнего, чтобы всегда был хотя бы один пустой элемент
-                for (int i = 0; i < data.length; i++) {
-                  String element = data[i];
-                  if (element.isEmpty && i != data.length - 1) {
-                    data.removeAt(i);
-                    i--; // Уменьшаем индекс, чтобы не пропустить следующий элемент после удаления
-                  }
-                }
-              },
-            );
-          },
+  void _showAddNewsBottomSheet(BuildContext context) {
+    // showModalBottomSheet(
+    //   context: context,
+    //   isScrollControlled: true,
+    //   builder: (BuildContext context) {
+    //     return AddNewsWidget();
+    //   },
+    // );
+  }
+
+  void _showAddPollBottomSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (BuildContext context) {
+        return AddPollWidget();
+      },
+    );
+  }
+}
+
+class TextNewsWidget extends StatelessWidget {
+  final String title;
+  final String newsText;
+  final String author;
+  final String dateTime;
+
+  TextNewsWidget(
+      {required this.title,
+      required this.newsText,
+      required this.author,
+      required this.dateTime});
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      elevation: 3.0,
+      child: Padding(
+        padding: EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              title,
+              style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 8.0),
+            Text(newsText),
+            SizedBox(height: 8.0),
+            Text('By $author • $dateTime'),
+          ],
         ),
       ),
     );
   }
 }
 
-class NewRowItem extends StatelessWidget {
-  final String text;
-  final ValueChanged<String> onChanged;
+class PollWidget extends StatefulWidget {
+  final String question;
+  final List<String> options;
+  final String author;
+  final String dateTime;
 
-  NewRowItem({
-    required this.text,
-    required this.onChanged,
-  });
+  PollWidget(
+      {required this.question,
+      required this.options,
+      required this.author,
+      required this.dateTime});
+
+  @override
+  _PollWidgetState createState() => _PollWidgetState();
+}
+
+class _PollWidgetState extends State<PollWidget> {
+  String? selectedOption;
+  Map<String, int> voteCount = {};
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.all(1.0),
-      decoration: BoxDecoration(
-        border: Border.all(color: Colors.grey),
-        borderRadius: BorderRadius.circular(16.0),
-      ),
-      child: TextField(
-        onChanged: onChanged,
-        decoration: InputDecoration(
-          hintText: 'Введите ваш ответ',
+    return Card(
+      elevation: 3.0,
+      child: Padding(
+        padding: EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              widget.question,
+              style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 8.0),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: widget.options
+                  .map((option) => Row(
+                        children: [
+                          Radio(
+                            value: option,
+                            groupValue: selectedOption,
+                            onChanged: (value) {
+                              setState(() {
+                                selectedOption = value as String?;
+                              });
+                            },
+                          ),
+                          Text(option),
+                        ],
+                      ))
+                  .toList(),
+            ),
+            SizedBox(height: 8.0),
+            ElevatedButton(
+              onPressed: selectedOption != null ? _vote : null,
+              child: Text('Vote'),
+            ),
+            SizedBox(height: 8.0),
+            _buildResults(),
+            SizedBox(height: 8.0),
+            Text('By ${widget.author} • ${widget.dateTime}'),
+          ],
         ),
       ),
+    );
+  }
+
+  void _vote() {
+    setState(() {
+      voteCount.update(selectedOption!, (value) => value + 1,
+          ifAbsent: () => 1);
+      selectedOption = null;
+    });
+  }
+
+  Widget _buildResults() {
+    if (voteCount.isEmpty) {
+      return Container();
+    }
+
+    int totalVotes =
+        voteCount.values.reduce((value, element) => value + element);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: widget.options.map((option) {
+        int optionVotes = voteCount[option] ?? 0;
+        double percentage =
+            totalVotes > 0 ? (optionVotes / totalVotes) * 100 : 0.0;
+
+        return Text('$option: ${percentage.toStringAsFixed(2)}%');
+      }).toList(),
     );
   }
 }
