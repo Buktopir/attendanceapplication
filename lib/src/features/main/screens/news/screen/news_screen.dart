@@ -1,6 +1,7 @@
 // news_screen.dart
 import 'package:attendanceapplication/src/features/widgets/widgets.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class NewsScreen extends StatefulWidget {
   @override
@@ -36,44 +37,52 @@ class _NewsScreenState extends State<NewsScreen> {
         ],
       ),
       body: SingleChildScrollView(
-          padding: EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children:[
-            TextNewsWidget(
-              title: 'Important News Title',
-              newsText:
-                  'This is the content of the news. It can be a longer text describing the news.',
-              author: 'Viktor ',
-              dateTime: 'January 21, 2024 10:30 AM',
-            ),
-            SizedBox(height: 16.0),
-            PollWidget(
-              question: 'What is your favorite color?',
-              options: ['Red', 'Blue', 'Green', 'Yellow'],
-              author: 'Viktor',
-              dateTime: 'January 21, 2024 11:45 AM',
-            ),]
-          )),
+        padding: EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ...widgetsList, // Вставляем виджеты из списка
+          ],
+        ),
+      ),
     );
   }
 
   void _showAddNewsBottomSheet(BuildContext context) {
-    // showModalBottomSheet(
-    //   context: context,
-    //   isScrollControlled: true,
-    //   builder: (BuildContext context) {
-    //     return AddNewsWidget();
-    //   },
-    // );
+    showModalBottomSheet(
+      context: context,
+       isScrollControlled: true,
+       builder: (BuildContext context) {
+         return AddNewsWidget(onPollCreated: (String TitleNews, String TextNews) {
+           setState(() {           widgetsList.add(TextNewsWidget(
+             title: TitleNews,
+             newsText: TextNews,
+             author: 'Viktor',
+             dateTime: DateTime.now().toString(),
+           ));
+         });
+         },);
+       },
+     );
   }
 
   void _showAddPollBottomSheet(BuildContext context) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
+      backgroundColor: Colors.transparent,
       builder: (BuildContext context) {
-        return AddPollWidget();
+        return AddPollWidget(onPollCreated: (String question, List<String> options) {
+          setState(() {
+            widgetsList.add(PollWidget(            question:
+            question
+            ,
+            options: options,
+            author: 'Viktor',
+              dateTime: DateTime.now().toString(),
+            ));
+          });
+        },);
       },
     );
   }
@@ -107,7 +116,7 @@ class TextNewsWidget extends StatelessWidget {
             SizedBox(height: 8.0),
             Text(newsText),
             SizedBox(height: 8.0),
-            Text('By $author • $dateTime'),
+            Text('By ${author} • ${DateFormat('MMMM dd, yyyy hh:mm a').format(DateTime.now())}'),
           ],
         ),
       ),
@@ -176,7 +185,7 @@ class _PollWidgetState extends State<PollWidget> {
             SizedBox(height: 8.0),
             _buildResults(),
             SizedBox(height: 8.0),
-            Text('By ${widget.author} • ${widget.dateTime}'),
+            Text('By ${widget.author} • ${DateFormat('MMMM dd, yyyy hh:mm a').format(DateTime.now())}'),
           ],
         ),
       ),
