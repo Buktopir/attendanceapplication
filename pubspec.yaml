@@ -36,6 +36,9 @@ dependencies:
   intl: ^0.17.0
   cupertino_icons: ^1.0.2
   web_socket_channel: ^2.4.0
+  http: ^0.13.3
+  flutter_secure_storage: ^9.0.0
+  google_sign_in : ^5.0.4
 
 dev_dependencies:
   flutter_test:
@@ -54,6 +57,7 @@ dev_dependencies:
 # The following section is specific to Flutter packages.
 flutter:
   assets:
+    - lib/src/ui/images/logo/atdnapp.png
     - lib/src/ui/images/logo/
 
   # The following line ensures that the Material Icons font is
